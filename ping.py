@@ -5,9 +5,6 @@
 # Import the mqtt module, used for message passing between tsilies' scripts.
 import paho.mqtt.client as mqtt
 
-# Import the threading module.
-import threading
-
 #import the subprocess module, used to execute the ping command.
 import subprocess
 
