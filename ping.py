@@ -1,5 +1,5 @@
 # This script is responsible for listening to a predefined mqtt topic for a host
-# to ping.
+# to ping and report the latency and host status to predefined mqtt topics.
 
 
 # Import the mqtt module, used for message passing between tsilies' scripts.
