@@ -1,7 +1,6 @@
 # This script is responsible for listening to a predefined mqtt topic for a host
 # to ping.
-# It implements threading so the host uptime check routine can happen without
-# blocking newer messages that may arrive while the routine is running.
+
 
 # Import the mqtt module, used for message passing between tsilies' scripts.
 import paho.mqtt.client as mqtt
