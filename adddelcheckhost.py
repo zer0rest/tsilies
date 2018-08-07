@@ -4,11 +4,14 @@
 # Import the sys module, used to receive cmd arguments.
 import sys
 
-# Import the re modulr used to do pattern matching when parsing the arguments
+# Import the re module used to do pattern matching when parsing the arguments
 import re
 
 # Import the os module used to read enviroment variables.
 import os
+
+# Import the json module used to modify the json file.
+import json
 
 # Define a variable to store the help message.
 HELP_MSG = """ This script is used to add/delete new hosts from the hosts.json file.
@@ -50,66 +53,152 @@ ARGUMENTS = sys.argv
 # We subtract one, cause the first argument is the name of the script itself.
 ARG_COUNT = len(sys.argv) - 1
 
+### FUNCTIONS ###
+
+# Create the function used to add new JSON "host" objects to hosts.json
+def addHost():
+    # Open the hosts.json file. We use the "r+" option to give us read/write capabilities
+    # cause "w" rewrites the file when opened, deleting everything that was already there.
+    # Try to load hosts.json. If it throws the IOError exception, it means the file does
+    # not exist so we need to create it first.
+    try:
+        with open("hosts.json", "r+") as hostfile:
+            # Load the list of objects into a variable
+            # In Python's terms the objects in hosts.json are translated to a list of
+            # python dictionaries.
+            hosts = json.load(hostfile)
+    except IOError:
+        print "hosts.json does not exist, creating it"
+        open("hosts.json", "w").close()
+        with open("hosts.json", "r+") as hostfile:
+            # Initialise the JSON file with brackets, "[]"
+            hostfile.write("[]")
+            hostfile.flush()
+        # We have to close and reopen the file for the "[]" to get written to it
+        with open("hosts.json", "r+") as hostfile:
+            # Initialise the JSON file with brackets, "[]"
+            hosts = json.load(hostfile)
+    # Create dictionary where host information will be added to append to the json
+    # file.
+    hostdata = {}
+    hostdata['host'] = HOSTNAME
+    hostdata['hostname'] = HOSTNAME
+    hostdata['location'] = LOCATION
+    hostdata['host-owner'] = HOST_OWNER
+    hostdata['monitor-agent'] = MONITOR_AGENT
+    hostdata['host-v4'] = HOST_V4
+    hostdata['host-v6'] = HOST_V6
+    hostdata['alert-method-down'] = ALERT_METHOD_DOWN
+    hostdata['alert-method-up'] = ALERT_METHOD_UP
+    hostdata['grace-period'] = GRACE_PERIOD
+    hostdata['status'] = "NULL"
+    hostdata['last-down'] = "NULL"
+
+    # Append the dictionary containing information about the new host to the list
+    # of dictionaries.
+    hosts.append(hostdata)
+
+    # Load the new object to the hosts.json file
+    # The indent=4 parameter is used to make the hosts.json file more readable.
+    # To do that it adds 4 spaces aka a 'Tab' before a new line.
+    with open("hosts.json", "r+") as hostfile:
+        json.dump(hosts, hostfile, indent=4, sort_keys=True)
+
+#################
+
+
 # If the flag is -add, then choose the addHost() function.
 if ARGUMENTS[1] == "-add":
     # If the -env parameter is set, retrieve the data from enviroment variables.
     if "-env" in ARGUMENTS:
         # Make sure that all enviroment variables have values and are not empty.
         #If everything is okay, load the enviroment variable value to the respective local variable.
-        if os.environ['HOST']:
-            HOST = os.environ["HOST"]
-        else:
-            print "Host enviroment variable has no value, exiting."
+        try:
+            if os.environ['HOST']:
+                HOSTNAME = os.environ["HOSTNAME"]
+            else:
+                print "Host enviroment variable has no value, exiting."
+                sys.exit(1)
+        except KeyError:
+            print "'HOSTNAME' variable does not exist, exiting"
             sys.exit(1)
 
-        if os.environ["GRACE_PERIOD"]:
-            GRACE_PERIOD = os.environ["GRACE_PERIOD"]
-        else:
-            print "Grace Period variable has no value, exiting."
+        try:
+            if os.environ["GRACE_PERIOD"]:
+                GRACE_PERIOD = os.environ["GRACE_PERIOD"]
+            else:
+                print "Grace Period variable has no value, exiting."
+                sys.exit(1)
+        except KeyError:
+            print "'GRACE_PERIOD' variable does not exist, exiting"
             sys.exit(1)
 
-        if os.environ["HOST_OWNER"]:
-            HOST_OWNER = os.environ["HOST_OWNER"]
-        else:
-            print "Host Owner enviroment variable has no value, exiting."
+        try:
+            if os.environ["HOST_OWNER"]:
+                HOST_OWNER = os.environ["HOST_OWNER"]
+            else:
+                print "Host Owner enviroment variable has no value, exiting."
+                sys.exit(1)
+        except KeyError:
+            print "'HOST_OWNER' variable does not exist, exiting"
             sys.exit(1)
 
-        if os.environ["LOCATION"]:
-            LOCATION = os.environ["LOCATION"]
-        else:
-            print "Location enviroment variable has no value, exiting."
+        try:
+            if os.environ["LOCATION"]:
+                LOCATION = os.environ["LOCATION"]
+            else:
+                print "Location enviroment variable has no value, exiting."
+                sys.exit(1)
+        except KeyError:
+            print "'LOCATION' variable does not exist, exiting"
             sys.exit(1)
 
-        # Make sure that all enviroment variables have values and are not empty.
-        if os.environ["MONITORING_AGENT"]:
-            HOST = os.environ["MONITORING_AGENT"]
-        else:
-            print "Monitoring agent enviroment variable has no value, exiting."
+        try:
+            if os.environ["MONITORING_AGENT"]:
+                MONITOR_AGENT = os.environ["MONITORING_AGENT"]
+            else:
+                print "Monitoring agent enviroment variable has no value, exiting."
+                sys.exit(1)
+        except KeyError:
+            print "'MONITORING_AGENT' variable does not exist, exiting"
             sys.exit(1)
 
-        if os.environ["HOST_V4"]:
-            HOST_v4 = os.environ["HOST_V4"]
-        else:
-            print "Host IPv4 address enviroment variable has no value, exiting."
+        try:
+            if os.environ["HOST_V4"]:
+                HOST_V4 = os.environ["HOST_V4"]
+            else:
+                print "Host IPv4 address enviroment variable has no value, exiting."
+                sys.exit(1)
+        except KeyError:
+            print "'HOST_V4' variable does not exist, exiting"
             sys.exit(1)
 
-        if os.environ["HOST_V6"]:
-            HOST_V6 = os.environ["HOST_V6"]
-        else:
-            print "Host IPv6 address enviroment variable has no value, exiting."
-            sys.exit(1)
+        try:
+            if os.environ["HOST_V6"]:
+                HOST_V6 = os.environ["HOST_V6"]
+            else:
+                print "Host IPv6 address enviroment variable has no value, exiting."
+                sys.exit(1)
+        except KeyError:
+            print "'HOST_V6' variable does not exist, exiting"
 
-        if os.environ["ALERT_METHOD_DOWN"]:
-            ALERT_METHOD_DOWN = os.environ["ALERT_METHOD_DOWN"]
-        else:
-            print "Alert Method Down enviroment variable has no value, exiting."
-            sys.exit(1)
+        try:
+            if os.environ["ALERT_METHOD_DOWN"]:
+                ALERT_METHOD_DOWN = os.environ["ALERT_METHOD_DOWN"]
+            else:
+                print "Alert Method Down enviroment variable has no value, exiting."
+                sys.exit(1)
+        except KeyError:
+            print "'ALERT_METHOD_DOWN' variable does not exist, exiting"
 
-        if os.environ["ALERT_METHOD_UP"]:
-            ALERT_METHOD_UP = os.environ["ALERT_METHOD_UP"]
-        else:
-            print "Alert Method Up enviroment variable has no value, exiting."
-            sys.exit(1)
+        try:
+            if os.environ["ALERT_METHOD_UP"]:
+                ALERT_METHOD_UP = os.environ["ALERT_METHOD_UP"]
+            else:
+                print "Alert Method Up enviroment variable has no value, exiting."
+                sys.exit(1)
+        except KeyError:
+            print "'ALERT_METHOD_UP' variable does not exist, exiting"
 
     else:
         # Check what parameter is passed and load its' value to the respective variable.
@@ -127,6 +216,9 @@ if ARGUMENTS[1] == "-add":
                 sys.exit(1)
             else:
                 HOSTNAME = ARGUMENTS[POS+1]
+        else:
+            print "Host argument is missing, exiting"
+            sys.exit(1)
 
         if "-loc" in ARGUMENTS:
             POS = ARGUMENTS.index("-loc")
@@ -142,6 +234,9 @@ if ARGUMENTS[1] == "-add":
                 sys.exit(1)
             else:
                 LOCATION = ARGUMENTS[POS+1]
+        else:
+            print "Location argument is missing, exiting"
+            sys.exit(1)
 
         if "-hown" in ARGUMENTS:
             POS = ARGUMENTS.index("-hown")
@@ -157,6 +252,9 @@ if ARGUMENTS[1] == "-add":
                 sys.exit(1)
             else:
                 HOST_OWNER = ARGUMENTS[POS+1]
+        else:
+            print "Host Owner argument is missing, exiting"
+            sys.exit(1)
 
         if "-mag" in ARGUMENTS:
             POS = ARGUMENTS.index("-mag")
@@ -172,6 +270,9 @@ if ARGUMENTS[1] == "-add":
                 sys.exit(1)
             else:
                 MONITOR_AGENT = ARGUMENTS[POS+1]
+        else:
+            print "Monitoring Agent argument is missing, exiting"
+            sys.exit(1)
 
         if "-4addr" in ARGUMENTS:
             POS = ARGUMENTS.index("-4addr")
@@ -187,6 +288,9 @@ if ARGUMENTS[1] == "-add":
                 sys.exit(1)
             else:
                 HOST_V4 = ARGUMENTS[POS+1]
+        else:
+            print "Host IPv4 Address argument is missing, exiting"
+            sys.exit(1)
 
         if "-6addr" in ARGUMENTS:
             POS = ARGUMENTS.index("-6addr")
@@ -202,6 +306,9 @@ if ARGUMENTS[1] == "-add":
                 sys.exit(1)
             else:
                 HOST_V6 = ARGUMENTS[POS+1]
+        else:
+            print "Host IPv6 Address argument is missing, exiting"
+            sys.exit(1)
 
         if "-aldown" in ARGUMENTS:
             POS = ARGUMENTS.index("-aldown")
@@ -217,6 +324,9 @@ if ARGUMENTS[1] == "-add":
                 sys.exit(1)
             else:
                 ALERT_METHOD_DOWN = ARGUMENTS[POS+1]
+        else:
+            print "Alert Down argument is missing, exiting"
+            sys.exit(1)
 
         if "-alup" in ARGUMENTS:
             POS = ARGUMENTS.index("-alup")
@@ -232,6 +342,9 @@ if ARGUMENTS[1] == "-add":
                 sys.exit(1)
             else:
                 ALERT_METHOD_UP = ARGUMENTS[POS+1]
+        else:
+            print "Alert Up argument is missing, exiting"
+            sys.exit(1)
 
         if "-grace" in ARGUMENTS:
             POS = ARGUMENTS.index("-grace")
@@ -247,6 +360,10 @@ if ARGUMENTS[1] == "-add":
                 sys.exit(1)
             else:
                 GRACE_PERIOD = ARGUMENTS[POS+1]
+        else:
+            print "Grace Period argument is missing, exiting"
+            sys.exit(1)
+    addHost()
 
 
 
@@ -281,42 +398,5 @@ else:
 # STATUS = ""
 # LAST_DOWN = ""
 
-# Create the function used to add new JSON "host" objects to hosts.json
-# def addHost():
-#     with open("hosts.json", "r+") as hostfile:
-#         # Load the list of objects into a var
-#         # In Python's terms the objects in hosts.json are translated to a list of
-#         # python dictionaries.
-#         hosts = json.load(hostfile)
-#     #test host info dictionary
-#     #host_inf = {"hostname":"edgerouter01", "location":"lamdc01", "host-owner":"zer0net-noc",
-#     #            "monitor-agent":"agent-1", "host-v4":"10.0.20.1", "host-v6":"NULL",
-#     #            "alert-method-down":"email-message", "alert-method-up":"sms-message", "grace-period":"0s",
-#     #            "status":"up", "last-down":"1530248404"}
-#     # Receive the message containing the host info and store it in a variable.
-#     hostinfo = str(message.payload)
-#     # Create dictionary where host information will be added to append to the json
-#     # file.
-#     newdata = {}
-#     newdata['hostname'] = host_inf['hostname']
-#     newdata['location'] = host_inf['location']
-#     newdata['host-owner'] = host_inf['host-owner']
-#     newdata['monitor-agent'] = host_inf['monitor-agent']
-#     newdata['host-v4'] = host_inf['host-v4']
-#     newdata['host-v6'] = host_inf['host-v6']
-#     newdata['alert-method-down'] = host_inf['alert-method-down']
-#     newdata['alert-method-up'] = host_inf['alert-method-up']
-#     newdata['grace-period'] = host_inf['grace-period']
-#     newdata['status'] = host_inf['status']
-#     newdata['last-down'] = host_inf['last-down']
-#
-#     # Append the dictionary containing information about the new host to the list
-#     # of dictionaries.
-#     hosts.append(newdata)
-#
-#     # Load the new object to the hosts.json file
-#     # The indent=4 parameter is used to make the hosts.json file more readable.
-#     # To do that it adds 4 spaces aka a 'Tab' before on new line.
-#     with open("hosts.json", "r+") as hostfile:
-#         json.dump(hosts, hostfile, indent=4, sort_keys=True)
+
 # addHost()
