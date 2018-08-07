@@ -81,7 +81,6 @@ def addHost():
     # Create dictionary where host information will be added to append to the json
     # file.
     hostdata = {}
-    hostdata['host'] = HOSTNAME
     hostdata['hostname'] = HOSTNAME
     hostdata['location'] = LOCATION
     hostdata['host-owner'] = HOST_OWNER
@@ -103,6 +102,19 @@ def addHost():
     # To do that it adds 4 spaces aka a 'Tab' before a new line.
     with open("hosts.json", "r+") as hostfile:
         json.dump(hosts, hostfile, indent=4, sort_keys=True)
+
+# Create function to delete a host from hosts.json, based on the host name passed
+# as an environment variable or from STDIN.
+def delHost():
+
+        with open("hosts.json", "r") as hostsfile:
+            hosts = json.load(hostsfile)
+            # Search through the list of dictionaries for the given "hostname"
+            # value.
+            for i , host_object in enumerate(hosts):
+                if host_object['hostname'] == HOST:
+                    # Find position in list of dictionary with the given hostname.
+                    print i
 
 #################
 
@@ -365,8 +377,6 @@ if ARGUMENTS[1] == "-add":
             sys.exit(1)
     addHost()
 
-
-
 # If the flag is -del, then choose the delHost() function.
 elif ARGUMENTS[1] == "-del":
     # Check if the enviroment flag is set. If that's the case,
@@ -380,7 +390,13 @@ elif ARGUMENTS[1] == "-del":
             sys.exit(1)
     else:
         if "-host" in ARGUMENTS:
+            # Host name is the 3rd argument after script name (0), -del (1) and -host (2)
             HOST = ARGUMENTS[3]
+        else:
+            print "Hostname argument is missing, exiting"
+            sys.exit(1)
+
+    delHost()
 
 # If the flag is -chk, then choose the checkHost() function.
 elif ARGUMENTS[1] == "-chk":
