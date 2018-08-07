@@ -9,21 +9,21 @@ _Τσίλιες_ backend is mainly written in `bash` and `python`.
 _Τσίλιες_ storage backend for host information is a JSON file. We chose this against a normal database like Mysql to remove unnecessary complexity and limit moving parts and points of failure.
 The JSON object structure is the following:
 ```
-{ "hosts": [
-  {
-    "hostname":"influxdb-01"
-    "host-v4":"1.2.3.4"
-    "host-v6":"2001:1388::1234"
-    "location":"med-01-athens"
-    "alert-method-down":"email-message,sms-messsage,voice-call"
-    "alert-method-up":"sms-message"
-    "grace-period":"60"
-    "monitor-agent":"agent-1"
-    "status":"up"
-    "last-down":"1530125916"
-    "host-owner":"db-admins"
-  }
-]}
+[
+    {
+        "alert-method-down": "email-message",
+        "alert-method-up": "sms-message",
+        "grace-period": "60",
+        "host-owner": "db_admins",
+        "host-v4": "4.3.2.1",
+        "host-v6": "2001:badf:00d::4321",
+        "hostname": "influx_db-01",
+        "last-down": "1530138795",
+        "location": "med01-athens",
+        "monitor-agent": "agent-1",
+        "status": "up"
+    }
+]
 ```
 In this object:
 
@@ -49,7 +49,7 @@ They are separated with comas, from the first method used to the last method use
 
 `last-down` is the unix timestamp of the time the host was last detected as unresponsive to pings.
 
-`host-owner` is the user or group of users that will be notified if the host goes down.   
+`host-owner` is the user or group of users that will be notified if the host goes down.
 
 _Τσίλιες_ scripts use mqtt for message passing between them. Currently a public mqtt broker, `iot.eclipse.org`, provided by eclipse is used. _TODO: Set up custom mqtt broker using the `mosquitto` package and post instructions on how to do so._
 
