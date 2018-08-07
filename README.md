@@ -62,7 +62,7 @@ ping.py is responsible for pinging the monitored hosts. It listens to a topic de
 
 __TODO:__
 
-- Test the script with IPv6 Addresses. The script has only been tested with IPv4 addresses. While, issues are not expected with IPv6 addresses, it should be testes to ensure none arise.
+- Test the script with IPv6 Addresses. The script has only been tested with IPv4 addresses. While, issues are not expected with IPv6 addresses, it should be tested to ensure none arise.
 - Improve error handling. The script currently has no logic to inform the user if the connection to the mqtt broker failed. It also does not have any logic to inform the user if the domain name supplied at the ping command is malformed. Instead it behaves as if the host never responded.
 - Compartmentalise the code more in functions for improved readability.
 
