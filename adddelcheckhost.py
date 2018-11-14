@@ -55,6 +55,17 @@ ARG_COUNT = len(sys.argv) - 1
 
 ### FUNCTIONS ###
 
+# Create the function to check if adddelcheckhost.py was called without any arguments
+def checkEmptyParams(arg_count):
+    # Check if the user has chosen to pass host information via evironmental variables
+    if (arg_count == 0):
+        # Return true if parameters have been passed
+        return True
+    else:
+        #Check if -env has been passed as a
+        # Return false if no parameters hae been passed
+        return False
+
 # Create the function used to add new JSON "host" objects to hosts.json
 def addHost():
     # Open the hosts.json file. We use the "r+" option to give us read/write capabilities
@@ -118,6 +129,9 @@ def delHost():
 
 #################
 
+if (checkEmptyParams(ARG_COUNT)):
+    print "No parameters were passed when adddelcheckhost.py was called"
+    sys.exit(1)
 
 # If the flag is -add, then choose the addHost() function.
 if ARGUMENTS[1] == "-add":
