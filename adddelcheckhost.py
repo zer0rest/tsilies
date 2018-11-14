@@ -126,6 +126,11 @@ def delHost():
                 if host_object['hostname'] == HOST:
                     # Find position in list of dictionary with the given hostname.
                     print i
+                else:
+                    print "No host found with the provided hostname"
+                    # Break out of the loop since it will keep posting no host
+                    # ffound for every item in the dictionary.
+                    break
 
 #################
 
