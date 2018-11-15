@@ -114,26 +114,56 @@ def addHost():
     with open("hosts.json", "r+") as hostfile:
         json.dump(hosts, hostfile, indent=4, sort_keys=True)
 
+    # Inform the user that the host was added and exit
+    print "Added " + hostdata['hostname']
+    sys.exit(0)
+
 # Create function to delete a host from hosts.json, based on the host name passed
 # as an environment variable or from STDIN.
 def delHost():
+    with open("hosts.json", "r") as hostsfile:
+        hosts = json.load(hostsfile)
+    # If hosts is an emty array, it must contain no host data. If that's the case
+    # print an error message and exit.
+    if (hosts == []):
+        print "hosts.json contains no host data to delete"
+        sys.exit(1)
+    else:
+        # Search through the list of dictionaries for the given "hostname"
+        # value.
+        for i , host_object in enumerate(hosts):
+            if (host_object['hostname'] == HOST):
+                # Find position in list of dictionary with the given hostname.
+                # and assign it to host_pos
+                host_pos = i
+                # After you found the position of the dictionary, exit
+                break
+        # If the whole array has been searched and no element has been found matching
+        # the hostname, print an errror message and exit.
+        if (host_pos == len(hosts)):
+            print "No host found with the provided hostname"
+            # Break out of the loop since it will keep posting no host
+            # found for every item in the dictionary.
+            sys.exit(1)
+        # Copy the old array to a new array, ommiting the matched element.
+        else:
+            # Initialise a new list of dictionaries, that will store the updated host info.
+            upd_hosts = []
+            # If the dictionary is not in the position of the dictionary that contains
+            # the hostname of the host-to-be-deleted, copy it to the new list of dictionaries.
+            for j, data in enumerate(hosts):
+                if (host_pos != j):
+                    upd_hosts.append(data)
+        # Overwrite the hosts.json file with the new data.
+        with open("hosts.json", "w") as hostsfile:
+             json.dump(upd_hosts, hostsfile, indent=4, sort_keys=True)
+        # Inform the user that the host was deleted and exit
+        print "Deleted " + HOST
+        sys.exit(0)
 
-        with open("hosts.json", "r") as hostsfile:
-            hosts = json.load(hostsfile)
-            # Search through the list of dictionaries for the given "hostname"
-            # value.
-            for i , host_object in enumerate(hosts):
-                if host_object['hostname'] == HOST:
-                    # Find position in list of dictionary with the given hostname.
-                    print i
-                else:
-                    print "No host found with the provided hostname"
-                    # Break out of the loop since it will keep posting no host
-                    # ffound for every item in the dictionary.
-                    break
+#####
 
-#################
-
+# Check if adddelcheckhost.py was called without any parameters.
 if (checkEmptyParams(ARG_COUNT)):
     print "No parameters were passed when adddelcheckhost.py was called"
     sys.exit(1)
@@ -145,7 +175,7 @@ if ARGUMENTS[1] == "-add":
         # Make sure that all enviroment variables have values and are not empty.
         #If everything is okay, load the enviroment variable value to the respective local variable.
         try:
-            if os.environ['HOST']:
+            if os.environ['HOSTNAME']:
                 HOSTNAME = os.environ["HOSTNAME"]
             else:
                 print "Host enviroment variable has no value, exiting."
@@ -409,13 +439,20 @@ elif ARGUMENTS[1] == "-del":
             sys.exit(1)
     else:
         if "-host" in ARGUMENTS:
-            # Host name is the 3rd argument after script name (0), -del (1) and -host (2)
-            HOST = ARGUMENTS[3]
+            # Check if no hostname was passed after -host, if that's the case exit
+            # That will be the case if the arguments array has 3 items, the script name,
+            # -del and -host
+            if (len(ARGUMENTS) == 3):
+                print "No hostname was passed, exiting"
+                sys.exit(1)
+            # If a hostname was passed, call the host deletion function
+            else:
+                # Host name is the 3rd argument after script name (0), -del (1) and -host (2)
+                HOST = ARGUMENTS[3]
+                delHost()
         else:
             print "Hostname argument is missing, exiting"
             sys.exit(1)
-
-    delHost()
 
 # If the flag is -chk, then choose the checkHost() function.
 elif ARGUMENTS[1] == "-chk":
@@ -429,9 +466,3 @@ elif ARGUMENTS[1] == "-help":
 else:
     print "error"
     sys.exit(1)
-
-# STATUS = ""
-# LAST_DOWN = ""
-
-
-# addHost()
