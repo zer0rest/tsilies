@@ -7,14 +7,16 @@ To add a new worker you first have to define a unique id `worker_uid` that will 
 
 To do that it makes the following API call: 
 
-Endpoint: `/api/worker/adopt`
+ - Endpoint: `/api/worker/adopt`
+ - HTTP Request Method: `POST`
+ - Header: `Accept: application/json`
 
-HTTP Request Method: `POST`
+With the following parameters:
 
-WIth the following parameters:
-
-```http
-worker_uid: <32 bit string>
+```json
+{
+    "worker_uid":"<32 bit string>"
+}
 ```
 
 ### Successful Adoption
@@ -50,11 +52,11 @@ To do that, it makes the following API call:
 
  - Endpoint: `/api/worker/poll`
  - HTTP Request Method: `GET`
-
+  
 With the following parameters:
 
 ```http
-worker_uid: <32 bit string>
+    worker_uid: <32 bit string>
 ```
 
 ### Approved Adoption
@@ -91,10 +93,13 @@ After the worker was approved it has to request a new API token to be able to ma
 
  - Endpoint: `/api/worker/token`
  - HTTP Request Method `POST`
+ - Header: `Accept: application/json`
 
-```http
-worker_uid: <32 bit string>
-secret: <String provided while checking for the adoption status>
+```json
+{
+    "worker_uid": "<32 bit string>",
+    "secret": "<String provided while checking for the adoption status>"
+}
 ```
 ### Successful call:
 If the data provided by the worker was correct the controller will respond with a new API token to be used by the worker.
@@ -184,3 +189,48 @@ If the old token or other data provided by the worker are invalid the controller
 }
 ```
 
+## Get job information
+
+The worker periodically checks for new jobs (host to ping and report status for) by making the following API call:
+
+ - Endpoint: `/api/worker/new_jobs`
+ - HTTP Request Method: `GET`
+ - HTTP Header: `Token: <Random hexadecimal string>`
+  
+  Using the following Parameters:
+
+  ```http
+    worker_uid: <32 bit string>
+  ```
+### Valid Data
+
+If the information submitted by the worker, the controller responds with the following information. 
+
+ - 200 OK
+
+If there are pending jobs:
+
+```json
+{
+    "hosts": [
+        {
+            "id":"1a2b3c",
+            "ip":"x.y.z.w",
+            "interval":"60",
+        },
+        {
+            "id":"4d5e6f",
+            "ip":"a.b.c.d",
+            "interval":"120"
+        }
+    ]
+}
+```
+
+If there are no pending jobs:
+
+```json
+{
+    "hosts":"none"
+}
+```
