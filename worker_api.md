@@ -72,7 +72,7 @@ If the worker was approved by the user the controller will respond with the foll
     "secret": "string"
 }
 ```
-The `secret` string is the "password" in a way that will be used by the worker when requesting an API token.
+The `secret` string is the "password" in a way that will be used by the worker when requesting an API token. The secret string is stored in a file so it can be re-used during the token renewal process.
 
 ### Unapproved Adoption
 
@@ -135,60 +135,7 @@ If the `secret` or the `worker_uid` parameter are invalid the controller will re
 ## Renewing an API token
 After the `expires_in` time has passed the token will have expired and the worker will have to request a new token.
 
-To request a new token, the worker has to make the following request:
-
- - Endpoint: `/api/worker/token_renew`
- - HTTP Request Method: `POST`
- - Header: `Accept: application/json`
-  
-Using the following parameters:
-```json
-{
-    "old_token": "<old token that has expired>",
-    "worker_uid": "<32 bit string>"
-}
-```
-
-### Valid data input
-
-If the data provided by the worker were correct the controller will repsond with a new token.
-
- - 200 OK
-
-```json
-{
-    "status": "ok",
-    "token": "<long hexadecimal string to-be-defined>",
-    "worker_uid": "<32 bit string>",
-    "expires_in": "604800"
-}
-```
-
-### Still Valid Token
-
-If the token provided by the worker is still valid the controller will respond with the following information:
-
- - 200 OK
-
-```json
-{
-    "status": "still_valid",
-    "worker_uid": "<32 bit string>",
-}
-```
-
-### Invalid data
-
-If the old token or other data provided by the worker are invalid the controller will respond with the following information:
-
- - 403 Unauthorised
-
-```json
-{
-    "status": "invalid_data",
-    "worker_uid": "<32 bit string>"
-}
-```
+To request a new token, the worker has to go through the token generation process again. It uses the `secret` string stored in a file at the system it's running on. 
 
 ## Get job information
 
